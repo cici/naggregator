@@ -1,0 +1,15 @@
+[tool.poetry]
+name = "news-aggregator"
+version = "0.1.0"
+description = ""
+authors = ["cici thomson <cici.thomson@temporal.io>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.12"
+temporalio = "^1.6.0"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

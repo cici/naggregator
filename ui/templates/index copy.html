@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<h1 class="font-title text-3xl text-neutral-950 mb-6 text-center">Temporal Newsfeed Generator</h1>
+<form class="flex items-center gap-4 mb-8 justify-center" action="/search" method="POST" enctype="multipart/form-data"> 
+    <input type="text" placeholder="Search Terms"
+        class="w-[300px] p-2 border border-neutral-300 rounded-full focus:outline-none focus:ring-2 focus:ring-primary-500" />
+    <button type="submit" class="bg-primary-500 text-white px-6 py-2 rounded-full hover:bg-primary-600 transition-all">
+        Search
+    </button>
+    <button type="submit" class="bg-primary-500 text-white px-6 py-2 rounded-full hover:bg-primary-600 transition-all">
+        Clear
+    </button>
+</form>
+
+
+<div class="divider divider-success"></div>
+
+<div class="overflow-x-auto">
+    <table class="table table-zebra">
+        <!-- head -->
+        <thead>
+            <tr>
+                <th></th>
+                <th>Name</th>
+                <th>Description</th>
+                <th>Results</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <th>3</th>
+                <td>Brice Swyre</td>
+                <td>Tax Accountant</td>
+                <td>Red</td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+
+
+
+{% endblock %}

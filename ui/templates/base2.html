@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en" data-theme="dracula">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/daisyui@4.12.11/dist/full.min.css" rel="stylesheet" type="text/css" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" type='text/css' href="{{url_for('static',filename='dist/output.css')}}">
+    <link rel="stylesheet" type='text/css' href="{{url_for('static',filename='index.css')}}">
+    <title>{% block title %}{{ app_info.name }}{% endblock title %}</title>
+</head>
+<body>
+    <div id="webcrumbs">
+        <div class="w-[1200px] bg-white shadow rounded-lg p-6">
+            <div class="mb-6">
+                <input type="text" placeholder="Search..."
+                    class="w-full p-3 border border-neutral-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500" />
+            </div>
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse">
+                    <thead class="bg-neutral-100">
+                        <tr>
+                            <th class="p-4">#</th>
+                            <th class="p-4">First Name</th>
+                            <th class="p-4">Last Name</th>
+                            <th class="p-4">Email</th>
+                            <th class="p-4">Role</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr class="hover:bg-neutral-50">
+                            <td class="p-4">1</td>
+                            <td class="p-4">John</td>
+                            <td class="p-4">Doe</td>
+                            <td class="p-4">john.doe@example.com</td>
+                            <td class="p-4">Admin</td>
+                        </tr>
+                        <tr class="bg-neutral-50 hover:bg-neutral-100">
+                            <td class="p-4">2</td>
+                            <td class="p-4">Jane</td>
+                            <td class="p-4">Smith</td>
+                            <td class="p-4">jane.smith@example.com</td>
+                            <td class="p-4">Editor</td>
+                        </tr>
+                        <tr class="hover:bg-neutral-50">
+                            <td class="p-4">3</td>
+                            <td class="p-4">Sam</td>
+                            <td class="p-4">Wilson</td>
+                            <td class="p-4">sam.wilson@example.com</td>
+                            <td class="p-4">Viewer</td>
+                        </tr>
+                        <tr class="bg-neutral-50 hover:bg-neutral-100">
+                            <td class="p-4">4</td>
+                            <td class="p-4">Chris</td>
+                            <td class="p-4">Evans</td>
+                            <td class="p-4">chris.evans@example.com</td>
+                            <td class="p-4">Admin</td>
+                        </tr>
+                        <tr class="hover:bg-neutral-50">
+                            <td class="p-4">5</td>
+                            <td class="p-4">Patricia</td>
+                            <td class="p-4">Brown</td>
+                            <td class="p-4">patricia.brown@example.com</td>
+                            <td class="p-4">Editor</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

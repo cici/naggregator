@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en" data-theme="dracula">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/daisyui@4.12.11/dist/full.min.css" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" type='text/css' href="{{url_for('static',filename='dist/output.css')}}">
+
+  <title>{% block title %}{{ title }}{% endblock title %}</title>
+</head>
+
+
+<body>
+  <div class="header-image">
+    <img src="{{ url_for('static', filename='Temporal_Logo_Animation.gif') }}" alt="Animated Image">
+  </div>
+  <div id="webcrumbs">
+    <div class="w-[1200px] bg-white shadow-lg rounded-lg p-6 min-h-[600px]">
+
+      <div class="container">
+        {% block content %}
+        {% endblock %}
+      </div>
+
+    </div>
+
+</body>
+
+</html>
+
+<script>
+  document.getElementById("news-input-form").addEventListener("submit", function (event) {
+    event.preventDefault();
+
+    var topicDate = document.getElementById("topicDate").value;
+    var topicString = document.getElementById("topicString").value;
+    var errorMessageElement = document.getElementById("error-message");
+
+    if (!topicDate || !topicString) {
+      errorMessageElement.style.display = "block";
+      errorMessageElement.textContent = "Please input both a date and a list of topics.";
+      return;
+    }
+
+    document.getElementById("news-input-form").submit();
+  });
+</script>
