@@ -2,10 +2,13 @@ import coloredlogs
 import os
 from logging import getLogger
 from temporalio.client import Client, TLSConfig
+from dotenv import load_dotenv
 
 # Create a logger object and use coloredlogs
 logger = getLogger(__name__)
 coloredlogs.install(level='INFO')
+
+load_dotenv()
 
 
 async def NewTemporalClient() -> Client:
@@ -14,6 +17,7 @@ async def NewTemporalClient() -> Client:
         os.getenv('TEMPORAL_MTLS_TLS_CERT')
         and os.getenv('TEMPORAL_MTLS_TLS_KEY') is not None
     ):
+        logger.info("Certs found...connecting to Temporal Cloud")
         CLOUD_ADDR = os.getenv('TEMPORAL_CLI_ADDRESS')
         CLOUD_NS = os.getenv('TEMPORAL_CLI_NAMESPACE')
         CLOUD_CERT = os.getenv('TEMPORAL_MTLS_TLS_CERT')

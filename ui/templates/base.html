@@ -35,15 +35,8 @@
   document.getElementById("news-input-form").addEventListener("submit", function (event) {
     event.preventDefault();
 
-    var topicDate = document.getElementById("topicDate").value;
     var topicString = document.getElementById("topicString").value;
-    var errorMessageElement = document.getElementById("error-message");
 
-    if (!topicDate || !topicString) {
-      errorMessageElement.style.display = "block";
-      errorMessageElement.textContent = "Please input both a date and a list of topics.";
-      return;
-    }
 
     document.getElementById("news-input-form").submit();
   });

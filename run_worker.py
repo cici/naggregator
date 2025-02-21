@@ -1,6 +1,7 @@
 import asyncio
 import coloredlogs
 import logging
+from dotenv import load_dotenv
 from temporal_client import NewTemporalClient
 from temporalio.worker import Worker
 from newsfeed_workflow import NewsfeedWorkflow
@@ -8,8 +9,9 @@ from activities import NewsActivities
 from news_data import NEWS_TASK_QUEUE
 import concurrent.futures
 
-logger = logging.getLogger(__name__)
-coloredlogs.install(level='INFO')
+load_dotenv()
+
+interrupt_event = asyncio.Event()
 
 
 async def main() -> None:
@@ -30,6 +32,30 @@ async def main() -> None:
         )
         await worker.run()
 
+    # Setup schedule for daily execution
+    # await client.create_schedule(
+    #     "daily-result-accumulator",
+    #     client.schedule_client.Schedule(
+    #         action=client.schedule_client.Schedule.Action(
+    #             start_workflow=client.schedule_client.Schedule.Action.StartWorkflow(
+    #                 workflow="NewsfeedWorkflow",
+    #                 id="weekly-news-workflow",
+    #                 task_queue=NEWS_TASK_QUEUE,
+    #             )
+    #         ),
+    #         spec=client.schedule_client.ScheduleSpec(
+    #             cron_expressions=["0 0 * * *"]  # Daily at midnight
+    #         )
+    #     )
+    # )
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    logger = logging.getLogger(__name__)
+    coloredlogs.install(level='INFO')
+    loop = asyncio.new_event_loop()
+    try:
+        loop.run_until_complete(main())
+    except KeyboardInterrupt:
+        interrupt_event.set()
+        loop.run_until_complete(loop.shutdown_asyncgens())
+    # asyncio.run(main())

@@ -6,9 +6,8 @@ This application uses [Serp API](https://serpapi.com/) to do the searches, so yo
 
 The requirements will be similar (yet more modern) to those in the AWS solution since the ultimate goal is to compare and contrast the architecture at the end.
 
-1. In the AWS solution, a "watchlist" was pre-defined
-1. Define a "watchlist" that contains the list of news sources to monitor. This will be defined in a JSON structure. These will be either RSS feeds or a webpage that needs to be scraped.
-2. Scrape webpages based on the created watchlist and put in JSON file
+1. In the AWS solution, a "watchlist" was pre-defined and kept in a data store. In this example, the list will be sent with the request.
+2. The AWS solution scraped webpages to find matches. In this example, we will simply use the Google Search SerpAPI to find the relevant matches.
 3. Grab RSS feeds based on the created watchlist and put in JSON file
 4. Put JSON files in AWS S3 bucket
 5. 
