@@ -64,7 +64,7 @@ class NewsActivities:
 
         # Initialize a WebClient instance with your OAuth token
         client = WebClient(
-            token="xoxb-921060233651-8250701804551-KcxyL9lHz6apTFCwzdd1Iy8y")
+            token="")
 
         # The channel ID or name where you want to send the message
         channel_id = "#newsfeed-demo"
