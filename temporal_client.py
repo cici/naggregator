@@ -22,6 +22,7 @@ async def NewTemporalClient() -> Client:
         CLOUD_NS = os.getenv('TEMPORAL_CLI_NAMESPACE')
         CLOUD_CERT = os.getenv('TEMPORAL_MTLS_TLS_CERT')
         CLOUD_KEY = os.getenv('TEMPORAL_MTLS_TLS_KEY')
+        CLOUD_API_KEY = os.getenv('TEMPORAL_API_KEY')
 
         clientcert = open(CLOUD_CERT, 'rb').read()
         clientprivatekey = open(CLOUD_KEY, 'rb').read()
@@ -36,6 +37,13 @@ async def NewTemporalClient() -> Client:
                                                     client_cert=clientcert,
                                                     client_private_key=clientprivatekey)
                                       )
+        # client = await Client.connect(
+        #     CLOUD_ADDR,
+        #     namespace=CLOUD_NS,
+        #     rpc_metadata={"temporal-namespace": CLOUD_NS},
+        #     api_key=CLOUD_API_KEY,
+        #     tls=True,
+        # )
         logger.info("Cloud Client started on " +
                     targethost)
     else:

@@ -15,7 +15,7 @@
 
 <body>
   <div class="header-image">
-    <img src="{{ url_for('static', filename='Temporal_Logo_Animation.gif') }}" alt="Animated Image">
+    <img src="{{ url_for('static', filename='Temporal_Logo_Animation.gif') }}" alt="Animated Logo">
   </div>
   <div id="webcrumbs">
     <div class="w-[1200px] bg-white shadow-lg rounded-lg p-6 min-h-[600px]">
@@ -32,12 +32,16 @@
 </html>
 
 <script>
-  document.getElementById("news-input-form").addEventListener("submit", function (event) {
-    event.preventDefault();
-
-    var topicString = document.getElementById("topicString").value;
-
-
-    document.getElementById("news-input-form").submit();
+  document.addEventListener("DOMContentLoaded", function() {
+    const form = document.getElementById("news-input-form");
+    if (form) {
+      form.addEventListener("submit", function (event) {
+        const topicString = document.getElementById("topicString").value;
+        if (!topicString || topicString.trim() === '') {
+          event.preventDefault();
+          alert("Please enter a topic before submitting.");
+        }
+      });
+    }
   });
 </script>

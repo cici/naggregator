@@ -8,12 +8,12 @@ set dotenv-load := true
 run_web:
     @echo "To use the .env file, first unset TEMPORAL_TASK_QUEUE TEMPORAL_CONNECTION_NAMESPACE TEMPORAL_CONNECTION_TARGET TEMPORAL_CONNECTION_MTLS_KEY_FILE TEMPORAL_CONNECTION_MTLS_CERT_CHAIN_FILE TEMPORAL_CONNECTION_WEB_PORT CALLER_API_PORT PUBLIC_WEB_URL"
     @echo "Starting web at $PUBLIC_WEB_URL"
-    poetry run python run_web.py
+    poetry run python3.10 run_web.py
 
 run_worker:
-  python run_worker.py
+  python3.10 run_worker.py
 
 # NOTE: run_workflow is used for scheduling and replaces the need to use run_web
 run_workflow:
-  python run_workflow.py
+  python3.10 run_workflow.py
 

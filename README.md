@@ -8,9 +8,7 @@ The requirements will be similar (yet more modern) to those in the AWS solution 
 
 1. In the AWS solution, a "watchlist" was pre-defined and kept in a data store. In this example, the list will be sent with the request.
 2. The AWS solution scraped webpages to find matches. In this example, we will simply use the Google Search SerpAPI to find the relevant matches.
-3. Grab RSS feeds based on the created watchlist and put in JSON file
-4. Put JSON files in AWS S3 bucket
-5. 
+3. For demo purposes, this application will pause for 15 seconds to mimic sleeping until the next day at which time it will wake up and perform the same search and report results for the "next day"
 
 ### Running the Scenarios
 Before running any `just` commands, ensure your environment is clean by unsetting any existing Temporal environment variables:
@@ -30,6 +28,17 @@ $ curl -sSL https://install.python-poetry.org | python3 -
 $ poetry install/update (if installed)
 ```
 
+# Create .env file
+Create a .env file that has defintions for the following env variables:
+TEMPORAL_MTLS_TLS_CERT='/Users/cici/Projects/certs/ca.pem'
+TEMPORAL_MTLS_TLS_KEY='/Users/cici/Projects/certs/ca.key'
+TEMPORAL_CLI_ADDRESS='cici-temporal-dev.a2dd6.tmprl.cloud:7233'
+TEMPORAL_CLI_NAMESPACE='cici-temporal-dev.a2dd6'
+
+SLACKAPI_KEY=<SLACKAPI_KEY>
+SERPAPI_KEY=<SERPAPI_KEY>
+TEMPORAL_TASK_QUEUE='NewsTaskQueue'
+
 # Run Web App
 ```bash
 $ just run_web
@@ -37,6 +46,5 @@ $ just run_web
 
 # Run Worker
 ```bash
-$ export SERP_API_KEY=mykey
 $ just run_worker
 ```

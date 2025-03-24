@@ -2,7 +2,6 @@ from slack_sdk.errors import SlackApiError
 import asyncio
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
-from aiosmtplib import SMTP
 import coloredlogs
 from slack_sdk import WebClient
 import json
@@ -15,10 +14,10 @@ from scrapegraphai.utils import prettify_exec_info
 from scrapegraphai.utils.data_export import export_to_json
 from serpapi import GoogleSearch
 from temporalio import activity
-from news_data import TopicInput
+from news_data import NewsfeedInput
 from temporalio.exceptions import ActivityError, ApplicationError
 
-CLAUDE_KEY = os.getenv('CLAUDE_KEY')
+SLACKAPI_KEY = os.getenv('SLACKAPI_KEY')
 SERPAPI_KEY = os.getenv('SERPAPI_KEY')
 
 # Create a logger object and use coloredlogs
@@ -29,7 +28,7 @@ coloredlogs.install(level='INFO')
 class NewsActivities:
 
     @activity.defn
-    def search_news(activity_input: TopicInput) -> list:
+    def search_news(activity_input: NewsfeedInput) -> dict:
         """Function to search and retrieve news based on query"""
         logger.info("Fetching the news")
 
@@ -55,7 +54,9 @@ class NewsActivities:
 
         # Create result dictionary where the key is the date of the search
         result_dict = {}
-        result_dict[activity_input.topicDate] = search_results['news_results']
+        if search_results:
+            result_dict[activity_input.topicDate] = search_results['news_results']
+        logger.info("Returning articles from Activity")
         return result_dict
 
     @activity.defn
@@ -64,7 +65,7 @@ class NewsActivities:
 
         # Initialize a WebClient instance with your OAuth token
         client = WebClient(
-            token="")
+            token=SLACKAPI_KEY)
 
         # The channel ID or name where you want to send the message
         channel_id = "#newsfeed-demo"

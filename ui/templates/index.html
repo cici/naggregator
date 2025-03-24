@@ -13,73 +13,296 @@
     <button type="reset" class="bg-slate-400 text-black px-6 py-2 rounded-full hover:bg-neutral-600 transition-all">
         Clear
     </button>
-    <input type="hidden" id="search_id" value="{{ search_id }}">
+    <input type="hidden" id="search_id" value="{{ query_id }}">
 </form>
 
 <div class="divider divider-info"></div>
 
 {% if topic is defined %}
-<div class="text-black">
-    Results for articles on {{ topic.topicString }} before {{ topic.topicDate }}
+<div id="results-header" class="text-black font-medium mb-4">
+    Results for articles on "<span id="topic-text">{{ topic }}</span>" 
+    
+    <span id="accumulation-badge" class="{% if dates|default([])|length <= 1 %}hidden{% endif %} inline-flex items-center ml-2 px-2 py-1 bg-green-100 text-green-800 text-xs font-medium rounded-full">
+        <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+        </svg>
+        Accumulating results over&nbsp;<span id="days-count">{{ dates|default([])|length }}</span>&nbsp;days
+    </span>
+    
+    <div id="auto-refresh-container" class="mt-2">
+        <label class="cursor-pointer flex items-center">
+            <input type="checkbox" id="auto-refresh-toggle" class="toggle toggle-sm toggle-primary" checked />
+            <span class="ml-2 text-sm">Auto-refresh every <span id="refresh-seconds">15</span> seconds</span>
+        </label>
+        <div class="text-xs text-gray-500 mt-1">
+            <span id="next-refresh-text">Next refresh in <span id="countdown">15</span> seconds</span>
+            <span id="refresh-status" class="ml-2 hidden">Refreshing...</span>
+        </div>
+    </div>
 </div>
 {% endif %}
 
-{% if articles is defined %}
-    <div className="space-y-2 mb-6">
-        {Array.from({ length: 10 }).map((_, i) => (
-        <details key={i} className="border border-gray-200 rounded-lg group transition-all duration-200 hover:shadow-md">
-            <summary className="px-4 py-3 cursor-pointer hover:bg-gray-50 transition-colors duration-200">
-                <span className="font-medium">{new Date(2023, 11, 10 + i).toISOString().split('T')[0]}</span>
+<div id="results-container">
+{% if articles is defined and articles|length > 0 %}
+<main class="news-container">
+    <div class="border border-gray-200 rounded-lg shadow-sm overflow-hidden">
+        <div class="px-4 py-3 bg-gray-50 font-medium text-lg text-neutral-800 flex justify-between items-center">
+            <span id="articles-count">Articles Found: {{ articles|length }}</span>
+            <span id="date-range" class="text-sm text-neutral-600 {% if dates|default([])|length <= 1 %}hidden{% endif %}">
+                Results from {{ dates|default([])|sort|first }} to {{ dates|default([])|sort|last }}
+            </span>
+        </div>
+
+        <div id="articles-by-date">
+        {# Group articles by date #}
+        {% set dates_dict = {} %}
+        {% for article in articles %}
+            {% if article.date not in dates_dict %}
+                {% set _ = dates_dict.update({article.date: []}) %}
+            {% endif %}
+            {% set _ = dates_dict[article.date].append(article) %}
+        {% endfor %}
+        
+        {# Display articles grouped by date #}
+        {% for date, date_articles in dates_dict.items()|sort(reverse=true) %}
+        <details class="group border-t border-gray-200" {% if loop.first %}open{% endif %}>
+            <summary class="px-4 py-3 cursor-pointer hover:bg-gray-50 transition-colors duration-200 font-medium text-neutral-800 flex items-center">
+                <span class="flex-1">{{ date }} ({{ date_articles|length }} articles)</span>
+                <svg class="w-5 h-5 text-neutral-500 group-open:rotate-180 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                </svg>
             </summary>
             
-            <div className="px-4 py-3 border-t border-gray-200">
-                <div className="grid grid-cols-4 gap-4">
-                    <img src={`https://picsum.photos/seed/${i}/100/100`}
-                        className="w-[100px] h-[100px] rounded-lg object-cover transform transition-transform duration-200 hover:scale-105"
-                        alt="Thumbnail" />
-                    <div>
-                        <h3 className="font-medium">Sample Title {i+1}</h3>
-                        <p className="text-sm text-gray-600">
-                            Lorem ipsum dolor sit amet consectetur adipisicing elit.
-                        </p>
-                    </div>
-                    <div>
-                        <p className="text-sm">Published:</p>
-                        <p className="font-medium">{new Date(2023, 10, 20 + i).toISOString().split('T')[0]}</p>
-                    </div>
-                    <div>
-                        <p className="text-sm">Source:</p>
-                        <p className="font-medium">Website {i+1}</p>
+            <div class="border-t border-gray-100">
+                {% for article in date_articles %}
+                <div class="px-4 py-4 {% if not loop.last %}border-b border-gray-100{% endif %} hover:bg-gray-50">
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                        <div class="md:col-span-1">
+                            {% if article.thumbnail %}
+                            <img src="{{ article.thumbnail }}"
+                                class="w-full h-[100px] rounded-lg object-cover transform transition-transform duration-200 hover:scale-105"
+                                alt="Thumbnail for {{ article.title }}">
+                            {% else %}
+                            <div class="w-full h-[100px] bg-gray-200 rounded-lg flex items-center justify-center text-gray-500">
+                                No image
+                            </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="md:col-span-3">
+                            <h3 class="font-medium text-lg text-neutral-800 mb-1">
+                                <a href="{{ article.link }}" target="_blank" class="hover:text-primary-600 hover:underline">{{ article.title }}</a>
+                            </h3>
+                            
+                            <p class="text-neutral-700 mb-2 text-sm">
+                                {{ article.snippet }}
+                            </p>
+                            
+                            <div class="flex flex-wrap items-center text-sm">
+                                <span class="text-neutral-600 mr-4">
+                                    <span class="font-medium">Source:</span> {{ article.source }}
+                                </span>
+                            </div>
+                        </div>
                     </div>
                 </div>
+                {% endfor %}
             </div>
         </details>
-        ))}
-    </div>
-
-
-
-<table class="w-full table-fixed border border-neutral-200 rounded-lg overflow-hidden shadow-md">
-    <thead>
-        <tr class="bg-primary-500 text-primary-50">
-            <th class="p-4 text-left">Thumbnail</th>
-            <th class="p-4 text-left">Title</th>
-            <th class="p-4 text-left">Date Published</th>
-            <th class="p-4 text-left">Source</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for article in articles %}
-        <tr class="bg-white hover:bg-primary-50 text-black transition-all">
-            <td class="p-4" width="25px"><img src="{{ article.thumbnail }}" /></td>
-            <td class="p-4" width="100px"><a href="{{ article.link }}"> {{ article.title }} </a></td>
-            <td class="p-4" width="25px">{{ article.date }}</td>
-            <td class="p-4" width="40px">{{ article.source }}</td>
-        </tr>
         {% endfor %}
-    </tbody>
-</table>
+        </div>
+    </div>
+</main>
+{% elif articles is defined %}
+<div class="text-center py-10 text-neutral-700">
+    <p>No articles found for this search. Try a different topic.</p>
+</div>
 {% endif %}
+</div>
 
+{% if topic is defined %}
+<script>
+    // Auto-refresh functionality
+    let autoRefreshEnabled = true;
+    let refreshIntervalSeconds = 15;
+    let countdownValue = refreshIntervalSeconds;
+    let refreshTimerId = null;
+    let countdownTimerId = null;
+    const queryId = "{{ query_id }}";
+    
+    // Elements
+    const autoRefreshToggle = document.getElementById('auto-refresh-toggle');
+    const countdownElement = document.getElementById('countdown');
+    const refreshStatusElement = document.getElementById('refresh-status');
+    const nextRefreshTextElement = document.getElementById('next-refresh-text');
+    
+    // Initialize auto-refresh
+    function initAutoRefresh() {
+        if (queryId) {
+            startRefreshTimer();
+            
+            // Toggle auto-refresh on/off
+            autoRefreshToggle.addEventListener('change', function() {
+                autoRefreshEnabled = this.checked;
+                if (autoRefreshEnabled) {
+                    startRefreshTimer();
+                } else {
+                    clearTimeout(refreshTimerId);
+                    clearInterval(countdownTimerId);
+                    countdownElement.textContent = refreshIntervalSeconds;
+                    nextRefreshTextElement.classList.add('hidden');
+                }
+            });
+        }
+    }
+    
+    // Start the refresh timer
+    function startRefreshTimer() {
+        // Clear any existing timers
+        clearTimeout(refreshTimerId);
+        clearInterval(countdownTimerId);
+        
+        // Reset countdown
+        countdownValue = refreshIntervalSeconds;
+        countdownElement.textContent = countdownValue;
+        nextRefreshTextElement.classList.remove('hidden');
+        
+        // Start countdown timer
+        countdownTimerId = setInterval(function() {
+            countdownValue--;
+            countdownElement.textContent = countdownValue;
+            
+            if (countdownValue <= 0) {
+                clearInterval(countdownTimerId);
+            }
+        }, 1000);
+        
+        // Set timer for next refresh
+        refreshTimerId = setTimeout(refreshContent, refreshIntervalSeconds * 1000);
+    }
+    
+    // Refresh the content via AJAX
+    function refreshContent() {
+        if (!autoRefreshEnabled || !queryId) return;
+        
+        refreshStatusElement.classList.remove('hidden');
+        nextRefreshTextElement.classList.add('hidden');
+        
+        fetch(`/api/newsfeed/${queryId}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    updateArticlesDisplay(data);
+                }
+            })
+            .catch(error => console.error('Error refreshing content:', error))
+            .finally(() => {
+                refreshStatusElement.classList.add('hidden');
+                if (autoRefreshEnabled) {
+                    startRefreshTimer();
+                }
+            });
+    }
+    
+    // Update the articles display with new data
+    function updateArticlesDisplay(data) {
+        const articles = data.articles;
+        const dates = data.dates;
+        
+        // Update article count
+        document.getElementById('articles-count').textContent = `Articles Found: ${articles.length}`;
+        
+        // Update days count and visibility
+        const daysCount = document.getElementById('days-count');
+        const accumulationBadge = document.getElementById('accumulation-badge');
+        
+        if (dates.length > 1) {
+            // Add the number with proper spacing
+            daysCount.textContent = dates.length;
+            accumulationBadge.classList.remove('hidden');
+            
+            // Update date range
+            const dateRange = document.getElementById('date-range');
+            dateRange.textContent = `Results from ${dates[0]} to ${dates[dates.length-1]}`;
+            dateRange.classList.remove('hidden');
+        } else {
+            accumulationBadge.classList.add('hidden');
+            document.getElementById('date-range').classList.add('hidden');
+        }
+        
+        // Group articles by date
+        const articlesByDate = {};
+        articles.forEach(article => {
+            if (!articlesByDate[article.date]) {
+                articlesByDate[article.date] = [];
+            }
+            articlesByDate[article.date].push(article);
+        });
+        
+        // Build HTML for articles
+        let articlesHtml = '';
+        
+        // Sort dates in reverse order (newest first)
+        const sortedDates = Object.keys(articlesByDate).sort().reverse();
+        
+        sortedDates.forEach((date, dateIndex) => {
+            const dateArticles = articlesByDate[date];
+            
+            articlesHtml += `
+            <details class="group border-t border-gray-200" ${dateIndex === 0 ? 'open' : ''}>
+                <summary class="px-4 py-3 cursor-pointer hover:bg-gray-50 transition-colors duration-200 font-medium text-neutral-800 flex items-center">
+                    <span class="flex-1">${date} (${dateArticles.length} articles)</span>
+                    <svg class="w-5 h-5 text-neutral-500 group-open:rotate-180 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                    </svg>
+                </summary>
+                
+                <div class="border-t border-gray-100">`;
+            
+            dateArticles.forEach((article, index) => {
+                const isLast = index === dateArticles.length - 1;
+                
+                articlesHtml += `
+                <div class="px-4 py-4 ${!isLast ? 'border-b border-gray-100' : ''} hover:bg-gray-50">
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                        <div class="md:col-span-1">
+                            ${article.thumbnail 
+                                ? `<img src="${article.thumbnail}" class="w-full h-[100px] rounded-lg object-cover transform transition-transform duration-200 hover:scale-105" alt="Thumbnail for ${article.title}">`
+                                : `<div class="w-full h-[100px] bg-gray-200 rounded-lg flex items-center justify-center text-gray-500">No image</div>`
+                            }
+                        </div>
+                        
+                        <div class="md:col-span-3">
+                            <h3 class="font-medium text-lg text-neutral-800 mb-1">
+                                <a href="${article.link}" target="_blank" class="hover:text-primary-600 hover:underline">${article.title}</a>
+                            </h3>
+                            
+                            <p class="text-neutral-700 mb-2 text-sm">
+                                ${article.snippet}
+                            </p>
+                            
+                            <div class="flex flex-wrap items-center text-sm">
+                                <span class="text-neutral-600 mr-4">
+                                    <span class="font-medium">Source:</span> ${article.source}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>`;
+            });
+            
+            articlesHtml += `
+                </div>
+            </details>`;
+        });
+        
+        // Update the articles container
+        document.getElementById('articles-by-date').innerHTML = articlesHtml;
+    }
+    
+    // Initialize auto-refresh when the page loads
+    initAutoRefresh();
+</script>
+{% endif %}
 
 {% endblock %}
